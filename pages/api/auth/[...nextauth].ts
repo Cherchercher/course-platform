@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import EmailProvider from 'next-auth/providers/email';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import nodemailer from 'nodemailer';
+import { SMTPClient } from 'emailjs';
 import { prisma } from 'lib/prisma';
 
 export default NextAuth({
@@ -12,6 +13,10 @@ export default NextAuth({
         host: process.env.EMAIL_SERVER_HOST,
         // @ts-ignore
         port: process.env.EMAIL_SERVER_PORT,
+        tls: {
+          ciphers: "SSLv3",
+          rejectUnauthorized: false,
+        },
         auth: {
           user: process.env.EMAIL_SERVER_USER,
           pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -24,23 +29,52 @@ export default NextAuth({
         provider: { server, from },
       }) => {
         // TODO: add prisma query
-        const user = await prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
-        console.log(user);
-        if (!user) return undefined;
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email,
+            },
+          });
+          console.log(user, "some user");
+          if (!user) return undefined;
+        }
+        catch (e) {
+          console.log(e);
+        }
+  
 
         const { host } = new URL(url);
-        const transport = nodemailer.createTransport(server);
-        await transport.sendMail({
-          to: email,
-          from,
-          subject: `Sign in to ${host}`,
-          text: text({ url, host }),
-          html: html({ url, host, email }),
+        // console.log(host);
+        // const transport = nodemailer.createTransport(server);
+        // await transport.sendMail({
+        //   to: email,
+        //   from,
+        //   subject: `Sign in to ${host}`,
+        //   text: text({ url, host }),
+        //   html: html({ url, host, email }),
+        // });
+
+        const client = new SMTPClient({
+          host: process.env.EMAIL_SERVER_HOST,
+          // @ts-ignore
+          port: process.env.EMAIL_SERVER_PORT,
+          ssl: true,
+          user: process.env.EMAIL_SERVER_USER,
+          password: process.env.EMAIL_SERVER_PASSWORD,
         });
+
+        client.send(
+          {
+            text: text({ url, host }),
+            attachment: [{data: html({ url, host, email }), alternative: true}],
+            to: "xiaoxuah@uci.edu",
+            from: "cherhuang@goplanatrip.com",
+            subject: `Sign in to ${host}`,
+          },
+          (err, message) => {
+            console.log(err || message);
+          }
+        )
       },
     }),
   ],

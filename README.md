@@ -103,6 +103,9 @@ You can test in a local environment using Stripe's CLI by forwarding events to y
 <img width="1920" alt="Setting up a webhook endpoint" src="https://user-images.githubusercontent.com/27310414/138911561-7f2c63b8-f78b-4be0-a978-c2fbf7b28957.png">
 
 
+stripe trigger charge.succeeded --add customer:email=xiaoxuah@uci.edu 
+
+
 ```
 stripe listen --forward-to localhost:3000/api/webhook
 

@@ -1,4 +1,4 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY_TEST);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -8,10 +8,11 @@ export default async function handler(req, res) {
         line_items: [
           {
             // TODO: replace this with the `price` of the product you want to sell
-            price: 'price_1JkVmQDcgX7dWwtuEokjccFt',
+            price: 'price_1MciVzEqnc7ZXyoyFPXA7CD0',
             quantity: 1,
           },
         ],
+        metadata: {productId: req.query.productId},
         payment_method_types: ['card'],
         mode: 'payment',
         success_url: `${req.headers.origin}/?success=true&session_id={CHECKOUT_SESSION_ID}`,

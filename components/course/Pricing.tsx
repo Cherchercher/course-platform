@@ -60,7 +60,7 @@ export const Pricing = () => {
                       </li>
                     ))}
                   </ul>
-                  <form action="/api/checkout" method="POST">
+                  <form action="/api/checkout?productId=prod_NNTSCDGlblRowA" method="POST">
                     <section>
                       <button
                         className="w-full flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-black hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"

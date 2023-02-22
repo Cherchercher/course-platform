@@ -4,7 +4,6 @@
 datasource db {
   provider             = "mysql"
   url                  = env("DATABASE_URL")
-  shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
   referentialIntegrity = "prisma"
 }
 
@@ -21,6 +20,15 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  purchases     Purchase[]
+}
+
+model Purchase {
+  productId          String
+  userId             String
+  status    String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([userId, productId])
 }
 
 model Account {
