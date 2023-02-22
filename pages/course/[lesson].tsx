@@ -21,10 +21,6 @@ const components = {
   Head,
 };
 
-<<<<<<< HEAD
-export default function LessonPage({ source, frontMatter }: Props) {
-  const { data: session, status } = useSession();
-=======
 const LoadingSkeleton = () => {
   return (
     <div className="flex justify-center max-w-screen-md mx-auto my-24">
@@ -69,7 +65,6 @@ export default function LessonPage() {
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/lessons/${lesson}`,
     fetcher,
   );
->>>>>>> e5c2bb7 (fix utility fetcher function)
 
   return (
     <>
