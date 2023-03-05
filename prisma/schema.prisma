@@ -60,6 +60,30 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+
+model Course {
+  id           String   @id @default(cuid())
+  courseBucket String @unique
+  name String
+  instructor String
+  instructorCredential String
+  price Int
+  salesPrice Int
+  pricing String?
+  pricingEnds DateTime?
+  features Feature[]
+  productId String
+  description String
+  pricingUnit String
+}
+
+model Feature {
+  id  String   @id @default(cuid())
+  courseId  String
+  description  String @unique
+  course Course  @relation(fields: [courseId], references: [id])
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique

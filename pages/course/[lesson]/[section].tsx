@@ -1,16 +1,59 @@
 import { LockClosedIcon } from '@heroicons/react/outline';
 import { MDXRemote } from 'next-mdx-remote';
+import { useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { LessonResponse } from 'pages/api/lessons/[lesson]';
-import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
+import Plyr from "plyr-react";
+import "plyr-react/plyr.css"
+
+import { useState, useRef } from 'react';
 import { fetcher } from 'utils/SWRFetcher';
 import ContentLoader from 'react-content-loader';
 import { useRouter } from 'next/router';
 
+import CourseParts from 'components/course/CourseParts';
+import { MediaStoreData } from 'aws-sdk';
+
 const components = {
   Head,
 };
+
+const sectionItems = [
+  {
+    "title": "module 1",
+    "parts": [
+      {"title": "Part 1",
+        "mediaType": "video",
+        "duration": "2",
+        "durationUnit": "minute",
+        "href": "module1/part1"
+      },
+      {"title": "part 2",
+      "mediaType": "video",
+      "duration": "30",
+      "durationUnit": "minute",
+      "href": "module1/part2"
+      },
+      {"title": "Quiz",
+      "mediaType": "quiz",
+      "duration": "7",
+      "durationUnit": "question",
+      "href": "module1/part3"
+      }
+    ]
+  },
+    {"href": "test",
+    "title": "module 2"},
+    {"href": "test",
+    "title": "module 3"},
+    {"href": "test",
+    "title": "module 4"},
+    {"href": "test",
+    "title": "module 5"}
+]
+
 
 const LoadingSkeleton = () => {
   return (
@@ -38,6 +81,8 @@ const LoadingSkeleton = () => {
     </div>
   );
 };
+
+
 const ErrorComponent = () => {
   return (
     <div className="prose max-w-screen-md mx-auto my-24">
@@ -51,18 +96,78 @@ const ErrorComponent = () => {
 export default function LessonPage() {
   const router = useRouter();
 
-  const { lesson } = router.query;
-  const { data, error } = useSWR<LessonResponse>(
+  const { lesson, section } = router.query;
+  const [ clickedSection, setClickedSection ] = useState(null);
+  const { data, error } = useSWRImmutable<LessonResponse>(
     `${process.env.NEXT_PUBLIC_SERVER_URL}/api/lessons/${lesson}`,
     fetcher,
   );
 
+  const [ courseUrl, setCourseUrl] = useState(data?.mediaData?.section1[0].partUrl);
+
+  const [ videoSrc, setVideoSrc ] = useState({
+    type: "video",
+    sources: [
+      {
+        src: courseUrl,
+        type: "video/mp4"
+      }
+    ]
+  });
+
+  const onSectionClicked = (i) => {
+    setClickedSection(i);
+  }
+
+  useEffect(() => {
+   setCourseUrl(data?.mediaData?.section1[0].partUrl);
+   setVideoSrc({
+    type: "video",
+    sources: [
+      {
+        src: data?.mediaData?.section1[0].partUrl,
+        type: "video/mp4"
+      }
+    ]
+  })
+}, [data])
+
+console.log(courseUrl);
+
   return (
-    <>
+    <div className='flow-root'>
+
+<aside className='bg-fuchsia-100 w-full md:w-60 float-left'>
+  <nav>
+    <ul>
+      {data?.mediaData && Object.entries(data?.mediaData).map( ([sectionName, parts], i) => (
+        parts && parts.length > 0 && (    
+          <div onClick={() => onSectionClicked(i)}>
+           <li className='m-2' key={sectionName}>
+              <Link href={`/course/${lesson}/${i}`}>
+                <a
+                  className={`flex p-2 bg-fuchsia-200 rounded hover:bg-fuchsia-400 cursor-pointer`}
+                >
+                  {sectionName}
+                </a>
+              </Link>
+            </li>
+        
+        {/* { parts.map( ({partName, partType, partUrl}, j) => ( */}
+        
+           
+            <CourseParts lesson={lesson} parts={parts} active={clickedSection == i? true: false}/>
+        {/* ))} */}
+         </ div> ) ) )}
+    </ul>
+  </nav>
+</aside>
+
       {data ? (
-        <div className="max-w-screen-md mx-auto my-24">
+        <div className="max-w-screen-md px-12 my-0 flow-right overflow-auto">
           <h1 className="font-bold text-xl mb-3">{data.frontMatter.title}</h1>
           <p className="text-lg mb-5">{data.frontMatter.description}</p>
+          { data.mediaData &&  <Plyr source={videoSrc} />}
           {data.source ? (
             <main className="prose">
               <MDXRemote {...data.source} components={components} />
@@ -97,6 +202,6 @@ export default function LessonPage() {
       ) : (
         <ErrorComponent />
       )}
-    </>
+    </div>
   );
 }
