@@ -103,7 +103,8 @@ export default function LessonPage() {
     fetcher,
   );
 
-  const [ courseUrl, setCourseUrl] = useState(data?.mediaData?.section1[0].partUrl);
+
+  const [ courseUrl, setCourseUrl] = useState(data?.mediaData[0]["parts"][0].partUrl);
 
   const [ videoSrc, setVideoSrc ] = useState({
     type: "video",
@@ -120,12 +121,12 @@ export default function LessonPage() {
   }
 
   useEffect(() => {
-   setCourseUrl(data?.mediaData?.section1[0].partUrl);
+   setCourseUrl(data?.mediaData[0]["parts"][0].partUrl);
    setVideoSrc({
     type: "video",
     sources: [
       {
-        src: data?.mediaData?.section1[0].partUrl,
+        src: data?.mediaData[0]["parts"][0].partUrl,
         type: "video/mp4"
       }
     ]

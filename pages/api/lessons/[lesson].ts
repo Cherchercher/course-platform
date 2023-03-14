@@ -16,6 +16,8 @@ interface Request extends NextApiRequest {
     lesson: string;
   };
 }
+
+
 export interface LessonResponse {
   source: MDXRemoteSerializeResult<Record<string, unknown>> | null;
   frontMatter: {
@@ -93,7 +95,8 @@ const handler = async (req: Request, res: Response) => {
       });
     };
 
-  let mediaData = dict(Array, {});
+  let mediaData = Array(result.CommonPrefixes.length).fill({"name": "", "parts": []});
+
 
     const getSignedUrl = function(key, bucket) {
       return new Promise((resolve, reject) => {
@@ -102,7 +105,8 @@ const handler = async (req: Request, res: Response) => {
           Key: key
         }, (err, data) => {
           if (err) reject(err);
-          resolve(data);
+          resolve(data     
+            );
         });
       });
     }
@@ -112,18 +116,18 @@ const handler = async (req: Request, res: Response) => {
     await Promise.all(
       result.CommonPrefixes.map(async (section, i) => {
         const parts = await listParts(bucket, section.Prefix);
-        await Promise.all(parts.Contents.map(async (part, i) => {
+        await Promise.all(parts.Contents.map(async (part, j) => {
         const keys = part.Key.split("/");
           if (keys.length > 1) {
             const [ partName, partType ] = keys[1].split(".");
             if (partName != '') {
               const partUrl = await getSignedUrl(part.Key, bucket);
-              mediaData[keys[0]].push({partName, partType, partUrl});
+              mediaData[i]["parts"].push({partName, partType, partUrl});
+              mediaData[i]["name"] = keys[0];
             }
           }
       }))
     }));
-
 
     const { content, data } = matter(source);
 
