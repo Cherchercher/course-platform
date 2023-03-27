@@ -124,4 +124,4 @@ For production, you need to set the endpoint URL to `domain-of-your-deployment/a
 
 ## Credits
 
-- [Landing page illustration](https://www.pixeltrue.com/free-packs/popular-icons) 
+-   [Landing page illustration](https://www.pixeltrue.com/free-packs/popular-icons) 
